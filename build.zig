@@ -18,8 +18,8 @@ pub fn build(b: *std.Build) void {
     });
 
     const module = b.addModule("phantom.template.module", .{
-        .source_file = .{ .path = b.pathFromRoot("src/phantom.zig") },
-        .dependencies = &.{
+        .root_source_file = .{ .path = b.pathFromRoot("src/phantom.zig") },
+        .imports = &.{
             .{
                 .name = "phantom",
                 .module = phantom.module("phantom"),
@@ -38,9 +38,9 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    exe_example.addModule("phantom", phantom.module("phantom"));
-    exe_example.addModule("phantom.template.module", module);
-    exe_example.addModule("options", exe_options.createModule());
+    exe_example.root_module.addImport("phantom", phantom.module("phantom"));
+    exe_example.root_module.addImport("phantom.template.module", module);
+    exe_example.root_module.addImport("options", exe_options.createModule());
     b.installArtifact(exe_example);
 
     if (!no_tests) {
@@ -54,7 +54,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         });
 
-        unit_tests.addModule("phantom", phantom.module("phantom"));
+        unit_tests.root_module.addImport("phantom", phantom.module("phantom"));
 
         const run_unit_tests = b.addRunArtifact(unit_tests);
         step_test.dependOn(&run_unit_tests.step);
