@@ -35,7 +35,7 @@ jobs:
           popd
       - name: Open PR
         uses: peter-evans/create-pull-request@v5
-        if: env.HAS_CHANGES == "yes"
+        if: env.HAS_CHANGES == 'yes'
         with:
           title: "Update Phantom UI core to ${{ env.PHANTOM_SHA }}"
           branch: update-phantom/${{ env.PHANTOM_SHA }}
