@@ -25,11 +25,17 @@ jobs:
           zig fetch --save=phantom https://github.com/PhantomUIx/core/archive/$PHANTOM_SHA.tar.gz
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          git add build.zig.zon
-          git commit build.zig.zon -m "chore: update core to $PHANTOM_SHA"
+          if ! git diff-index --quiet HEAD --; then
+            git add build.zig.zon
+            git commit build.zig.zon -m "chore: update core to $PHANTOM_SHA"
+            export HAS_CHANGES=yes
+          else
+            export HAS_CHANGES=no
+          fi
           popd
       - name: Open PR
         uses: peter-evans/create-pull-request@v5
+        if: ${{ env.HAS_CHANGES == "yes" }}
         with:
           title: "Update Phantom UI core to ${{ env.PHANTOM_SHA }}"
           branch: update-phantom/${{ env.PHANTOM_SHA }}
