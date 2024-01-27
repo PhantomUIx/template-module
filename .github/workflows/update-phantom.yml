@@ -1,0 +1,33 @@
+name: Update Phantom UI
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  update-phantom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          repository: https://github.com/PhantomUIx/core
+          path: phantom-core
+      - uses: goto-bus-stop/setup-zig@v2
+      - name: Update Phantom UI
+        run: |
+          export PHANTOM_SHA=$(git -C phantom-core rev-parse HEAD)
+          pushd main
+          git switch -c update-phantom/$PHANTOM_SHA
+          zig fetch --save=phantom https://github.com/PhantomUIx/core/archive/$PHANTOM_SHA.tar.gz
+          git add build.zig.zon
+          git commit build.zig.zon -m "chore: update core to $PHANTOM_SHA"
+          popd
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: "Update Phantom UI core to ${{ env.PHANTOM_SHA }}"
+          branch: update-phantom/${{ env.PHANTOM_SHA }}
+          path: main
