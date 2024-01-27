@@ -3,7 +3,7 @@ const Phantom = @import("phantom");
 
 pub const phantomModule = Phantom.Sdk.PhantomModule{};
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const no_importer = b.option(bool, "no-importer", "disables the import system (not recommended)") orelse false;
@@ -15,6 +15,8 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
         .@"no-importer" = no_importer,
+        .@"no-docs" = no_docs,
+        .@"import-module" = try Phantom.Sdk.ModuleImport.init(&.{}, b.pathFromRoot("src"), b.allocator),
     });
 
     const module = b.addModule("phantom.template.module", .{
@@ -46,15 +48,7 @@ pub fn build(b: *std.Build) void {
     if (!no_tests) {
         const step_test = b.step("test", "Run all unit tests");
 
-        const unit_tests = b.addTest(.{
-            .root_source_file = .{
-                .path = b.pathFromRoot("src/phantom.zig"),
-            },
-            .target = target,
-            .optimize = optimize,
-        });
-
-        unit_tests.root_module.addImport("phantom", phantom.module("phantom"));
+        const unit_tests = phantom.artifact("test");
 
         const run_unit_tests = b.addRunArtifact(unit_tests);
         step_test.dependOn(&run_unit_tests.step);
