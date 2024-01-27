@@ -23,6 +23,8 @@ jobs:
           pushd main
           git switch -c update-phantom/$PHANTOM_SHA
           zig fetch --save=phantom https://github.com/PhantomUIx/core/archive/$PHANTOM_SHA.tar.gz
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
           git add build.zig.zon
           git commit build.zig.zon -m "chore: update core to $PHANTOM_SHA"
           popd
