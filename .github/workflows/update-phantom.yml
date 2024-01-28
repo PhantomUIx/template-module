@@ -20,6 +20,7 @@ jobs:
       - name: Update Phantom UI
         run: |
           export PHANTOM_SHA=$(git -C phantom-core rev-parse HEAD)
+          echo "PHANTOM_SHA=$PHANTOM_SHA" >> $GITHUB_ENV
           pushd main
           git switch -c update-phantom/$PHANTOM_SHA
           zig fetch --save=phantom https://github.com/PhantomUIx/core/archive/$PHANTOM_SHA.tar.gz
@@ -32,6 +33,7 @@ jobs:
           else
             export HAS_CHANGES=no
           fi
+          echo "HAS_CHANGES=$HAS_CHANGES" >> $GITHUB_ENV
           popd
       - name: Open PR
         uses: peter-evans/create-pull-request@v5
